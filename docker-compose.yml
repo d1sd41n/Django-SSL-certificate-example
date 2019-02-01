@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./example:/example
+      - ./nginx:/etc/nginx/conf.d
+      - ./sslfiles:/etc/nginx/ssl
+    depends_on:
+      - django
+  django:
+    build: .
+    command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn example.wsgi -b 0.0.0.0:443"
+    volumes:
+      - ./example:/example
+    expose:
+      - "443"
